@@ -1,12 +1,8 @@
 import pandas as pd
 import openpyxl
+from datetime import date, datetime
 
-df = pd.read_csv('C:/Users/family/Documents/Weekly Enrollment Sheets/Copy of Liberal Arts AHC and Undecided Spring 2023 ENR 2023.05.23.csv')
-pd.set_option('display.max_columns', None)
-print(df.dtypes)
-df.sort_values(by=['Section Number'])
-df.fillna(0)
-print(df)
+
 
 class SetDates:
 
@@ -16,16 +12,16 @@ class SetDates:
     def set_start_date(self):
         
         if self.section_df.loc[0, 'Session Code'] == '1':
-            self.section_df['Start Date'] == '1/9/23'
+            self.section_df['Start Date'] == '2023-01-29'
         if self.section_df.loc[0, 'Session Code'] == '15Q':
             self.section_df['Start Date'] == '1/9/23'
         if self.section_df.loc[0, 'Session Code'] == '9A':
             self.section_df['Start Date'] == '1/9/23'
         if self.section_df.loc[0, 'Session Code'] == '15B':
             # self.section_df = self.section_df.assign(Start_Date='2/6/23')
-            self.section_df.loc[:, 'Start Date'] = '2/6/23'
+            self.section_df.loc[:, 'Start Date'] = '2023-02-06'
             self.section_df['Start Date'] = pd.to_datetime(self.section_df['Start Date'])
-            self.section_df['Enrollment Drop Date'] = pd.to_datetime(self.section_df['Enrollment Drop Date'])
+
 
         if self.section_df.loc[0, 'Session Code'] == '9B':
             self.section_df['Start Date'] == '3/20/23'
@@ -35,6 +31,8 @@ class SetDates:
 
     def start_date_enrollment(self):
         start_date = self.section_df.loc[0, 'Start Date']
+        print(self.section_df.dtypes)
+        self.section_df['Enrollment Drop Date'] = pd.to_datetime(self.section_df['Enrollment Drop Date'])
         start_date_enrollment_df = self.section_df[self.section_df['Enrollment Drop Date'] > start_date]
         starting_enrollment = len(self.section_df)
         print(starting_enrollment)
@@ -44,12 +42,38 @@ class SetDates:
         census_date_enrollment_df = self.section_df[self.section_df['Enrollment Drop Date'] > census_date]
         print(census_date_enrollment_df)
         print(len(census_date_enrollment_df))
+
+    def current_date_enrollment(self):
+        today = date.today()
+        # semester_end_date = '2023-05-31'
+        # date_object = datetime.strptime(semester_end_date, '%Y-%m-%d').date()
+        print(type(today))
+        print(semester_end_date)
+        print(self.section_df.dtypes)
+        if today > semester_end_date:
+            today = semester_end_date
+        else:
+            today = today
+            current_enrollment_df = self.section_df[self.section_df['Enrollment Drop Date'] < today]
+
+        print(current_enrollment_df)
+
 # def set start dates
 # def set census dates
 # def calculate enrollment at start date
 # def calculate drop rate
 # def calculate FTES
+df = pd.read_csv('C:/Users/family/Documents/Weekly Enrollment Sheets/Copy of Liberal Arts AHC and Undecided Spring 2023 ENR 2023.05.23.csv')
+pd.set_option('display.max_columns', None)
+
+df.sort_values(by=['Section Number'])
+df.fillna(0)
+semester_end_date = '2023-05-31'
+semester_end_date = datetime.strptime(semester_end_date, '%Y-%m-%d').date()
 df = df[df['Term'] != 'nan']
+
+df['Enrollment Drop Date'] = pd.to_datetime(df['Enrollment Drop Date']).dt.date
+print(df.dtypes)
 section_numbers = []
 print(len(df))
 for i in range(len(df)):
@@ -58,11 +82,12 @@ for i in range(len(df)):
 
 for section in section_numbers:
     section_df = df[df['Section Number'] == section].reset_index()
-    section_df = section_df.fillna('5/31/23')
+    section_df = section_df.fillna(semester_end_date)
+    print(section_df.dtypes)
     dates = SetDates(section_df=section_df)
     dates.set_start_date()
     dates.set_census_date()
     dates.start_date_enrollment()
     dates.census_date_enrollment()
-
+    dates.current_date_enrollment()
 df.to_excel('Test.xlsx')
