@@ -20,22 +20,25 @@ class SetDates:
         if self.section_df.loc[0, 'Session Code'] == '15B':
             # self.section_df = self.section_df.assign(Start_Date='2/6/23')
             self.section_df.loc[:, 'Start Date'] = '2023-02-06'
-            self.section_df['Start Date'] = pd.to_datetime(self.section_df['Start Date'])
+
 
 
         if self.section_df.loc[0, 'Session Code'] == '9B':
             self.section_df['Start Date'] == '3/20/23'
+        self.section_df['Start Date'] = pd.to_datetime(self.section_df['Start Date'])
 
     def set_census_date(self):
         self.section_df['Census Date'] = self.section_df['Start Date'] + pd.Timedelta(days=21)
 
     def start_date_enrollment(self):
         start_date = self.section_df.loc[0, 'Start Date']
+        # start_date = start_date.to_date()
         print(self.section_df.dtypes)
         self.section_df['Enrollment Drop Date'] = pd.to_datetime(self.section_df['Enrollment Drop Date'])
         start_date_enrollment_df = self.section_df[self.section_df['Enrollment Drop Date'] > start_date]
+
         starting_enrollment = len(self.section_df)
-        print(starting_enrollment)
+        print('start date df',start_date_enrollment_df)
 
     def census_date_enrollment(self):
         census_date = self.section_df['Start Date'] + pd.Timedelta(days=21)
@@ -45,6 +48,7 @@ class SetDates:
 
     def current_date_enrollment(self):
         today = date.today()
+        # ['Enrollment Drop Date'] = df[df['Enrollment Drop Date']].dt.date
         # semester_end_date = '2023-05-31'
         # date_object = datetime.strptime(semester_end_date, '%Y-%m-%d').date()
         print(type(today))
@@ -53,7 +57,6 @@ class SetDates:
         if today > semester_end_date:
             today = semester_end_date
         else:
-            today = today
             current_enrollment_df = self.section_df[self.section_df['Enrollment Drop Date'] < today]
 
         print(current_enrollment_df)
